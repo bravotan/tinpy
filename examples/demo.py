@@ -21,8 +21,8 @@ for fn in os.listdir('.'):
                    'owner': getpwuid(st[ST_UID])[0],
                    'group': getgrgid(st[ST_GID])[0]})
     
-print tinpy.build(open('demo.tpt').read(), 
+print(tinpy.build(open('demo.tpt').read(), 
             pwd=os.environ['PWD'], dirlist=dirmap,
-            tekito={'hoge':'[% var hoge %]',})
-print '-' * 70    
-print 'Ran (%3.3f sec)\n' % (time() - start)
+            tekito={'hoge':'[% var hoge %]',}))
+print('-' * 70)    
+print('Ran (%3.3f sec)\n' % (time() - start))

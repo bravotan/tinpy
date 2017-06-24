@@ -12,7 +12,7 @@ so it became generate document with template.
 
 import string
 import re
-from StringIO import StringIO
+from io import StringIO
 
 class TemplateParser:
     "Template parser."
@@ -32,7 +32,7 @@ class TemplateParser:
             self.lineno = self.lineno + chunk.count('\n')
             self.chunk = chunk
             if self.tppattern.match(chunk):
-                apply(self.handler.handle, chunk[2:-2].split())
+                self.handler.handle(*chunk[2:-2].split())
                 continue
             try: self.handler.handle_data(chunk)
             except: pass
@@ -52,24 +52,21 @@ class ProcessingHandler:
         elif arg == 'end':
             self.in_comment = 0
         else:
-            raise SyntaxError, "invalid syntax: comment %s" % str(arg)
+            raise SyntaxError("invalid syntax: comment %s" % str(arg))
 
     def op_stag(self, *args):
         if len(args) != 0:
-            raise SyntaxError, \
-                  "invalid syntax: %s" % string.join(list(args))
+            raise SyntaxError("invalid syntax: %s" % string.join(list(args)))
         self.template.write('[%%')
 
     def op_etag(self, *args):
         if len(args) != 0:
-            raise SyntaxError, \
-                  "invalid syntax: %s" % string.join(list(args))
+            raise SyntaxError("invalid syntax: %s" % string.join(list(args)))
         self.template.write('%%]')
 
     def op_var(self, *args):
         if len(args) != 1:
-            raise SyntaxError, \
-                  "invalid syntax: args: %s" % string.join(list(args))
+            raise SyntaxError("invalid syntax: args: %s" % string.join(list(args)))
         self.template.write('%%(%s)s' % args[0])
          
     def op_for(self, *args):         
@@ -80,8 +77,8 @@ class ProcessingHandler:
             if len(vars) == 1:
                 vars = vars[0]
             srclist = ''.join(args[in_index+1:])
-        except Exception, e:
-            raise SyntaxError, "invalid syntax: '%s' %s" % (string.join(list(args)), e)
+        except Exception as e:
+            raise SyntaxError("invalid syntax: '%s' %s" % (string.join(list(args)), e))
         self.template.forblock_begin(vars, srclist)
 
     def op_done(self):
@@ -89,8 +86,7 @@ class ProcessingHandler:
 
     def op_if(self, *args):
         if len(args) != 1:
-            raise SyntaxError, \
-                  "invalid syntax: args: %s" % string.join(list(args))
+            raise SyntaxError("invalid syntax: args: %s" % string.join(list(args)))
         self.template.ifblock_begin(args[0])
 
     def op_endif(self):
@@ -113,7 +109,7 @@ class ProcessingHandler:
             return
 
         # Handle operation.
-        apply(getattr(self, 'op_' + op), tokens)
+        getattr(self, 'op_' + op)(*tokens)
 
 class Template:
     "Template object."
@@ -174,8 +170,8 @@ class DictEnhanceAccessor:
             return eval('val'+ buf.getvalue(), # code
                         {'__builtins__':{}}, # globals is restricted.
                         {'val':val}) # locals is only 'val'
-        except Exception, e:
-            if self.strict: raise Exception, e
+        except Exception as e:
+            if self.strict: raise Exception(e)
         return  ''
 
     def __setitem__(self, key, val):
@@ -207,7 +203,7 @@ class VariableStack:
     def find(self, varname):
         value = None
         for variables in self.stack:
-            if variables.has_key(varname):
+            if varname in variables:
                 value = variables[varname]
                 break
         return value
@@ -215,8 +211,8 @@ class VariableStack:
     def normalize(self):
         mapitem = {}
         for variables in self.stack:
-            for key in variables.keys():
-                if not mapitem.has_key(key):
+            for key in list(variables.keys()):
+                if key not in mapitem:
                     mapitem[key] = variables[key]
         return mapitem
 
@@ -231,11 +227,11 @@ class TemplateManager:
         from types import StringType
         for node in nodelist:
             if type(node) == StringType:
-                print node
+                print(node)
             else:
-                print node, 'for %s in %s' % (node.seqvarnames, node.seqname)
+                print(node, 'for %s in %s' % (node.seqvarnames, node.seqname))
                 self.__pprint(node.nodelist)
-                print '<end of block>'
+                print('<end of block>')
 
     def pprint(self):
         self.__pprint(self.template.nodelist)
@@ -297,7 +293,7 @@ class TemplateRenderer:
                     if type(node.seqvarnames) == str:
                         self.varstack.push({node.seqvarnames: var})
                     else:
-                        self.varstack.push(dict(zip(node.seqvarnames, var)))
+                        self.varstack.push(dict(list(zip(node.seqvarnames, var))))
                     self.__build(node.nodelist)
                     self.varstack.pop()
             else:
@@ -314,16 +310,16 @@ def compile(template):
     tpl.set_processhandler(hn)    
     try:
         tpl.parse(template)
-    except SyntaxError, e:
-        raise SyntaxError, "line %d, in '%s' %s" % (
-            tpl.lineno, tpl.chunk, e)
+    except SyntaxError as e:
+        raise SyntaxError("line %d, in '%s' %s" % (
+            tpl.lineno, tpl.chunk, e))
     return hn.template.template
 
 def build(template, vardict=None, strict=False, **kw):
     "Building document from template and variables."
 
     if vardict == None: vardict = {}
-    for key in kw.keys():
+    for key in list(kw.keys()):
         vardict[key] = kw[key]
     if not isinstance(template, Template):
         template = compile(template)
