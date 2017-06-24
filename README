@@ -1,0 +1,109 @@
+What's tinpy?
+=============
+
+tinpy is a "tiny python template". This is template description language
+like the "Template Toolkit" for Python.
+
+Python is simple and powerful script language.
+That language site is http://www.python.org/
+
+Quick Start
+===========
+
+Require python distutils.(http://www.python.org/sigs/distutils-sig/)
+
+  $ python setup.py install
+
+Below case is become root-user if required.
+
+  $ su
+  Password:
+  # python setup.py install
+
+Usage
+=====
+
+This sample is listing current directory and generate HTML table.
+
+--- cut below ---
+
+#!/usr/bin/env python
+
+import tinpy
+import os
+from stat import ST_MODE, S_ISDIR
+
+# Generate file list table.
+dirlist = []
+for fn in os.listdir('.'):
+    if S_ISDIR(os.stat(fn)[ST_MODE]):
+        dirlist.append(('Dir', fn))
+    else:
+        dirlist.append(('File', fn))
+
+# Template .
+print tinpy.build("""
+<table>
+[% for file in dirlist %]
+<tr>
+ [% for col in file %]
+  <td>[% var col %]</td>
+ [% done %]
+</tr>
+[% done %]
+</table>
+""", dirlist=dirlist)
+
+--- cut above ---
+
+And more example is tinpy.py test code. For example,
+
+  $ python ./tinpy.py
+
+Template syntax
+===============
+
+This language syntax like "Template Toolkit", keyword like sh.
+And more simple than these.
+
+Extract variable:
+    [%var varname%]
+
+Extract dictionary:
+    [%var dic['key']%]
+
+Variable sequence loop:
+    [%for varname in sequence%]
+      [%varname%]
+    [%done%]
+
+Escaping template:
+    template   to
+    ---------- --
+    [% stag %] [%
+    [% etag %] %]
+
+Comment:
+    [%comment begin%]
+    --- comment here ---
+    [%comment end%]
+
+Python API
+==========
+
+tinpy.build(template, vardict={}, **kw)
+
+  Build from template and variables. vardict and kw is variable for template.
+  template is string characters or compiled template object (see next).
+
+tinpy.compile(template)
+
+  Compile a template object from string characters.
+  Created object can be used for build().
+
+Contact
+=======
+
+mailto:bravo@resourcez.org
+
+Have fun :)

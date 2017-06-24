@@ -1,0 +1,42 @@
+2006-04-10  Keisuke URAGO  <bravo@resourcez.org>
+
+	- Release version 2.4
+	* tinpy.py [% if expr %] syntax added.
+
+2003-03-26  Keisuke URAGO  <bravo@resourcez.org>
+
+	- Release version 2.3
+	* tinpy.py: Enable to use variable which reference dictionary key.
+	* tinpy.py: Parsing error message useful to debug supported.
+	* tinpy.py: Syntax check problem fixed.
+
+
+2003-03-07  Keisuke URAGO  <bravo@resourcez.org>
+
+	- Release version 2.2
+	* tinpy.py Compile function added.
+
+2003-02-27  Keisuke URAGO  <bravo@resourcez.org>
+
+	- Release version 2.1
+	* tinpy.py Template escaping syntax changed.
+
+2003-02-21  Keisuke URAGO  <bravo@resourcez.org>
+
+	- Release version 2.0
+	* tinpy.py: Change template sytax. (For writing valid XML.)
+
+2003-02-06  Keisuke_URAGO  <bravo@resourcez.org>
+
+	- Release version 1.1
+	* tinpy.py: Reference dictionary mapping function added.
+
+2001-12-26  Keisuke_URAGO <bravo@resourcez.org>
+
+	- Release version 1.0
+	* tinpy.py: Initial release.
+
+	
+Local variables:
+mode: change-log
+End:
